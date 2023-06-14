@@ -1,0 +1,11 @@
+"Value","Landuse"
+0,FRST
+1,WATR
+2,SNOV
+3,FRST
+4,BARR
+5,URBN
+6,AGRL
+7,BARR
+8,BARR
+9,GRSV
