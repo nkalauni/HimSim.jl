@@ -1,6 +1,7 @@
 using CSV, DataFrames, Optim, Dates, Plots
 
 include("src/Gr4j.jl")
+include("src/Calibration.jl")
 
 # reading-in the observed discharge and forcing values 
 obsPath = # path to obs data
@@ -26,12 +27,11 @@ calEnd = Date(2011, 12, 31)
 calForcings = filter(row -> row[:isodate] >= calStart && row[:isodate] <= calEnd, forcings)
 obsSel = filter(row -> row[:datetime] >= calStart && row[:datetime] <= calEnd, obs)
 
-# number of iterations of the optimization algorithm
-nIters = 1000
+initParams = # array with initial values for the parameters
 
 @time begin # calculate the calibration time
 
-calQ, calPars, loss = Gr4j.calibrate(calForcings, obsSel.discharge, paramSpace, nIters)
+calQ, calPars, loss = Calibration.calibrate(calForcings, obsSel.discharge, initParams, paramSpace)
 
 end
 
