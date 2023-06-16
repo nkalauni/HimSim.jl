@@ -57,4 +57,21 @@ include("Calibration.jl")
 
         return eto
     end
+
+    function simulate(forcings; precipCol=:precip,petCol=:pet, x1 = 50, x2 = 0, x3 = 150, x4 = 5)
+        p = forcings[!,precipCol]
+        e = forcings[!, petCol]
+
+        S = zeros(Float64, 2)
+
+        #Define fluxes
+        flux_pn = max(p-e, 0)
+        flux_en = -flux_pn
+
+        for t in eachindex(p)
+            Pval = p[t]
+            PETval = e[t]
+
+            flux_ps = flux_pn * ()
+    end
 end
