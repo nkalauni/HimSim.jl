@@ -31,47 +31,27 @@ include("Calibration.jl")
         return x^y
     end
 
-    "Caulate PET using Hargreaves-Samani equation"
-    function hargreaves(forcings, latitude; tminCol=:tmin, tmaxCol=:tmax, dtCol=:datetime)
-        
-        dts = forcings[!,dtCol]
-        tmin = forcings[!,tminCol]
-        tmax = forcings[!,tmaxCol]
-        len = length(tmax)
-        Gsc = 0.0820
-        latRad = latitude*(pi/180)
-
-        doy = map(dayofyear, dts)
-
-        tavg = map(mean, zip(tmin, tmax))
-
-        eto = zeros(len)
-
-        for (i,t) in enumerate(doy)
-            dr = 1 + 0.33 * cos((2*pi*t)/365)
-            delta = 0.409 * sin((2*pi*t)/365 - 1.39)
-            ws = acos(- tan(latRad) * tan(delta))
-            Ra = (24 * 60) / pi * Gsc * dr * (ws * sin(latRad) * sin(delta) + cos(latRad) * cos(delta) * sin(ws))
-            eto[i] = (0.023 * 0.408 * (tavg[i] + 17.8) * (tmax - tmin)^0.5 * Ra)
-        end
-
-        return eto
+    function gr4j!(du, u, p, t)
+        s = u[1]
+        r = u[2]
+        ps = pn * (1 - (s/p[1])^2)
+        es = en * (2*s/p[1] - (s/p[1])^2)
+        perc = p[1]^(-4) / 4 * (4/9)^(-4) * s^5
+        du[1] = ps - es - perc
+        fx2 = p[2] * (max(r,0)/p[3])^3.5
+        qr = p[3]^(-4)/4 * r^5
+        q1, qremain1 = route(0.1*(pn - ps + perc), p[4], UH_half, qremain1)     #Calculate q1 after solving ODEs?
+        q9, qremain9 = route(0.9*(pn - ps + perc), 2*p[4], UH_full, qremain9)
+        du[2] = q9 + fx2 - qr
     end
 
     function simulate(forcings; precipCol=:precip,petCol=:pet, x1 = 50, x2 = 0, x3 = 150, x4 = 5)
-        p = forcings[!,precipCol]
-        e = forcings[!, petCol]
+        P = forcings[!,precipCol]
+        Ep = forcings[!, petCol]
 
-        S = zeros(Float64, 2)
+        pn = max(P - Ep, 0)
+        en = max(Ep - P, 0)
 
-        #Define fluxes
-        flux_pn = max(p-e, 0)
-        flux_en = -flux_pn
-
-        for t in eachindex(p)
-            Pval = p[t]
-            PETval = e[t]
-
-            flux_ps = flux_pn * ()
+        
     end
 end
