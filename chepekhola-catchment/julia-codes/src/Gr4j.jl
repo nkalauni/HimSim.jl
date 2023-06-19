@@ -31,6 +31,48 @@ include("Calibration.jl")
         return x^y
     end
 
+    "Unit hydrograph for Q1 based on GR4J (Perrin et al. 2003)"
+    function hydrograph_half_bell(base_time)
+        times = 1:ceil(base_time)
+        
+        SH = zeros(length(times) + 1)
+        SH[1] = 0
+        UH = zeros(length(times))
+    
+        for t in times
+            if t <= base_time
+                SH[t+1] = (t/base_time)^2.5
+            elseif t > base_time
+                SH[t+1] = 1
+            end
+            UH[t] = SH[t+1] - SH[t]
+        end
+    
+        return UH
+    end
+    
+    "Unit hydrograph for Q9 based on GR4J (Perrin et al. 2003)"
+    function hydrograph_full_bell(base_time)
+        times = 1:2*ceil(base_time)
+        
+        SH = zeros(length(times) + 1)
+        SH[1] = 0
+        UH = zeros(length(times))
+    
+        for t in times
+            if t <= base_time
+                SH[t+1] = 0.5 * (t/base_time)^2.5
+            elseif base_time < t <= 2*base_time
+                SH[t+1] = 1 - 0.5 * (2 - t/base_time)^2.5
+            elseif t > 2*base_time
+                SH[t+1] = 1
+            end
+            UH[t] = SH[t+1] - SH[t]
+        end
+    
+        return UH
+    end
+
     function gr4j!(du, u, p, t)
         s = u[1]
         r = u[2]
