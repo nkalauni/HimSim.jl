@@ -12,7 +12,7 @@ forcingPath = # path to forcings data
 forcings = CSV.read(forcingPath, DataFrame)
 
 # comment this out if observed pets are available
-forcings.pet = Gr4j.hargreaves(forcings, tminCol=:tmin, tmaxCol=:tmax, dtCol=:isodate)
+forcings.pet = Utils.hargreaves(forcings, tminCol=:tmin, tmaxCol=:tmax, dtCol=:isodate)
 
 paramSpace = Dict{Symbol,Dict}(
     :x1 => Dict{Symbol, Float64}(:lower => 1, :upper => 100),
