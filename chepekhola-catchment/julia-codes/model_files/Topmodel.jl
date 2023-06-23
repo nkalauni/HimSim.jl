@@ -8,7 +8,6 @@ using DomainSets
 const μ = 3
 
 @variables ζ t Suz(t) Ssz(t)              #Stores
-@variables P(t) Ep(t)                   #Forcings
 @parameters Suzmax St Kd q0 f χ ϕ
 D = Differential(t)
 
@@ -23,18 +22,25 @@ end
 
 @register_symbolic ShiftedGamma(ζ, χ, ϕ)
 
+precip = readfromcsv
+pet = readfromcsv
 
+P(t) = precip[Int(floor(t)) + 1]
+Ep(t) = pet[Int(floor(t)) + 1]
+
+@register_symbolic P(t)
+@register_symbolic Ep(t)
 
 @named topmodel = ODESystem([D(Suz) ~ Peff - Qex - Ea - Qv,
                             D(Ssz) ~ -Qv + Qb,
                             Ea ~ min(Suz / (St * Suzmax), 1) * Ep,
                             Qv ~ max((Suz - St * Suzmax) / (Suzmax * (1-St)) * Kd, 0),
                             Qex ~ Suz == Suzmax ? Peff : 0,
-                            Peff = P * (1 - Ac),
-                            Qb = q0 * exp(-f * Ssz),
-                            Qof = Ac * P,
-                            Q💧 = Qof + Qex + Qb,
-                            λ = χ * ϕ + μ,
-                            χcrit = f * Ssz + λ,
-                            Iζ = Integral(ζ in DomainSets.ClosedInterval(χcrit, Inf)),
-                            Ac = Iζ(ShiftedGamma(ζ, χ, ϕ))])
+                            Peff ~ P * (1 - Ac),
+                            Qb ~ q0 * exp(-f * Ssz),
+                            Qof ~ Ac * P,
+                            Q💧 ~ Qof + Qex + Qb,
+                            λ ~ χ * ϕ + μ,
+                            χcrit ~ f * Ssz + λ,
+                            Iζ ~ Integral(ζ in DomainSets.ClosedInterval(χcrit, Inf)),
+                            Ac ~ Iζ(ShiftedGamma(ζ, χ, ϕ))])
