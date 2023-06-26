@@ -1,32 +1,37 @@
 module Utils
 
-using DataFrames, Dates
+using DataFrames, Dates, CSV
+
+"Return vector from a CSV"
+function readfromcsv(file_path)
+    return DataFrame(CSV.File(file_path))
+end
 
 "Caulate PET using Hargreaves-Samani equation"
-    function hargreaves(forcings, latitude; tminCol=:tmin, tmaxCol=:tmax, dtCol=:datetime)
-        
-        dts = forcings[!,dtCol]
-        tmin = forcings[!,tminCol]
-        tmax = forcings[!,tmaxCol]
-        len = length(tmax)
-        Gsc = 0.0820
-        latRad = latitude*(pi/180)
+function hargreaves(forcings, latitude; tminCol=:tmin, tmaxCol=:tmax, dtCol=:datetime)
 
-        doy = map(dayofyear, dts)
+    dts = forcings[!, dtCol]
+    tmin = forcings[!, tminCol]
+    tmax = forcings[!, tmaxCol]
+    len = length(tmax)
+    Gsc = 0.0820
+    latRad = latitude * (pi / 180)
 
-        tavg = map(mean, zip(tmin, tmax))
+    doy = map(dayofyear, dts)
 
-        eto = zeros(len)
+    tavg = map(mean, zip(tmin, tmax))
 
-        for (i,t) in enumerate(doy)
-            dr = 1 + 0.33 * cos((2*pi*t)/365)
-            delta = 0.409 * sin((2*pi*t)/365 - 1.39)
-            ws = acos(- tan(latRad) * tan(delta))
-            Ra = (24 * 60) / pi * Gsc * dr * (ws * sin(latRad) * sin(delta) + cos(latRad) * cos(delta) * sin(ws))
-            eto[i] = (0.023 * 0.408 * (tavg[i] + 17.8) * (tmax - tmin)^0.5 * Ra)
-        end
+    eto = zeros(len)
 
-        return eto
+    for (i, t) in enumerate(doy)
+        dr = 1 + 0.33 * cos((2 * pi * t) / 365)
+        delta = 0.409 * sin((2 * pi * t) / 365 - 1.39)
+        ws = acos(-tan(latRad) * tan(delta))
+        Ra = (24 * 60) / pi * Gsc * dr * (ws * sin(latRad) * sin(delta) + cos(latRad) * cos(delta) * sin(ws))
+        eto[i] = (0.023 * 0.408 * (tavg[i] + 17.8) * (tmax - tmin)^0.5 * Ra)
     end
+
+    return eto
+end
 
 end
