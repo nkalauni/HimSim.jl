@@ -1,15 +1,20 @@
 using ModelingToolkit
 using DifferentialEquations
 using Plots
-using Distributions
 using SpecialFunctions
 using DomainSets
 
+include("../src/Utils.jl")
+
 const μ = 3
 
-@variables ζ t Suz(t) Ssz(t)              #Stores
+@variables t Suz(t) Ssz(t)
+@variables P(t) Ep(t)
+@variables χcrit(t) Ac(t) Peff(t) Ea(t) Qv(t) Qb(t) Qof(t) Q(t)
 @parameters Suzmax St Kd q0 f χ ϕ
+
 D = Differential(t)
+Iζ = Integral(t in DomainSets.ClosedInterval(χcrit, Inf))
 
 function ShiftedGamma(ζ, χ, ϕ)
     if ζ > μ
@@ -22,25 +27,34 @@ end
 
 @register_symbolic ShiftedGamma(ζ, χ, ϕ)
 
-precip = readfromcsv
-pet = readfromcsv
+function excess(store, eff_rain, Suzmax)
+    return (store == Suzmax ? eff_rain : 0)
+end
 
-P(t) = precip[Int(floor(t)) + 1]
-Ep(t) = pet[Int(floor(t)) + 1]
+@register_symbolic excess(Suz, Peff, Suzmax)
 
-@register_symbolic P(t)
-@register_symbolic Ep(t)
+# precip = readfromcsv
+# pet = readfromcsv
 
-@named topmodel = ODESystem([D(Suz) ~ Peff - Qex - Ea - Qv,
-                            D(Ssz) ~ -Qv + Qb,
-                            Ea ~ min(Suz / (St * Suzmax), 1) * Ep,
-                            Qv ~ max((Suz - St * Suzmax) / (Suzmax * (1-St)) * Kd, 0),
-                            Qex ~ Suz == Suzmax ? Peff : 0,
-                            Peff ~ P * (1 - Ac),
-                            Qb ~ q0 * exp(-f * Ssz),
-                            Qof ~ Ac * P,
-                            Q💧 ~ Qof + Qex + Qb,
-                            λ ~ χ * ϕ + μ,
-                            χcrit ~ f * Ssz + λ,
-                            Iζ ~ Integral(ζ in DomainSets.ClosedInterval(χcrit, Inf)),
-                            Ac ~ Iζ(ShiftedGamma(ζ, χ, ϕ))])
+# P(t) = precip[Int(floor(t)) + 1]
+# Ep(t) = pet[Int(floor(t)) + 1]
+
+# @register_symbolic P(t)
+# @register_symbolic Ep(t)
+
+@named topmodel = ODESystem(
+    [
+    χcrit ~ f * Ssz + χ * ϕ + μ,
+    Ac ~ Iζ(ShiftedGamma(t, χ, ϕ)),
+    Peff ~ P * (1 - Ac),
+    Qex ~ excess(Suz, Peff, Suzmax),
+    Ea ~ min(Suz / (St * Suzmax), 1) * Ep,
+    Qv ~ max((Suz - St * Suzmax) / (Suzmax * (1 - St)) * Kd, 0),
+    D(Suz) ~ Peff - Qex - Ea - Qv,
+    Qb ~ q0 * exp(-f * Ssz),
+    D(Ssz) ~ -Qv + Qb,
+    Qof ~ Ac * P,
+    Q ~ Qof + Qex + Qb
+])
+
+structural_simplify(topmodel)
