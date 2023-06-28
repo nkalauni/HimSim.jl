@@ -9,3 +9,5 @@ include("model_files/Topmodel.jl")
 
 forcings = Utils.readfromcsv("input-data.csv")
 forcings.pet = Utils.hargreaves(forcings, 28.05, tminCol=:tmin, tmaxCol=:tmax, dtCol=:datetime)
+
+modelSystem = Topmodel.system(forcings[!, :precip], forcings[!, :pet])
