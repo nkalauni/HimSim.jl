@@ -4,7 +4,7 @@ using DataFrames, Dates, CSV
 
 "Wrapper function to read from csv"
 function readfromcsv(filepath)
-    return DataFrame(CSV.file(filepath))
+    return DataFrame(CSV.File(filepath))
 end
 
 "Caulate PET using Hargreaves-Samani equation"
