@@ -12,7 +12,7 @@ include("../src/Utils.jl")
 
 D = Differential(t)
 
-forcings = Utils.ReadFromCSV("E:/CWRS_Internship/hydro-modeling/chepekhola-catchment/input-data/chepe_data.csv")
+forcings = Utils.readfromcsv("E:/CWRS_Internship/hydro-modeling/chepekhola-catchment/input-data/chepe_data.csv")
 precip = forcings[:,2]
 pet = forcings[:,7]
 
