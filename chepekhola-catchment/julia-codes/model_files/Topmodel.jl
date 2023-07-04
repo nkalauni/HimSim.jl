@@ -16,6 +16,12 @@ function system(precip, eval)
     D = Differential(t)
     Iζ = Integral(t in DomainSets.ClosedInterval(ζcrit, Inf))
 
+    P(t) = precip[Int(floor(t)) + 1]
+    Ep(t) = evap[Int(floor(t)) + 1]
+
+    @register_symbolic P(t)
+    @register_symbolic Ep(t)
+
     function ShiftedGamma(ζ, χ, ϕ)
         if ζ > μ
             fvalue = 1 / (χ * gamma(ϕ)) * ((ζ - μ) / χ)^(ϕ-1) * exp(-(ζ - μ) / χ)
@@ -24,7 +30,7 @@ function system(precip, eval)
         end
         return fvalue
     end
-
+    
     @register_symbolic ShiftedGamma(ζ, χ, ϕ)
 
     function excess(check, limit, default, alternate)
