@@ -4,17 +4,17 @@ using Plots
 using SpecialFunctions
 using DomainSets
 
-const μ = 3
+include("../src/Utils.jl")
 
-function system(precip, evap)
-    
+μ = 3
+
+function system(precip, eval)
     @variables t Suz(t) Ssz(t)
-    @variables P(t) Ep(t)
-    @variables χcrit(t) Ac(t) Peff(t) Ea(t) Qv(t) Qb(t) Qof(t) Q(t)
+    @variables Qex(t) ζcrit(t) Ac(t) Peff(t) Ea(t) Qv(t) Qb(t) Qof(t) Q(t)
     @parameters Suzmax St Kd q0 f χ ϕ
 
     D = Differential(t)
-    Iζ = Integral(t in DomainSets.ClosedInterval(χcrit, Inf))
+    Iζ = Integral(t in DomainSets.ClosedInterval(ζcrit, Inf))
 
     function ShiftedGamma(ζ, χ, ϕ)
         if ζ > μ
@@ -27,38 +27,43 @@ function system(precip, evap)
 
     @register_symbolic ShiftedGamma(ζ, χ, ϕ)
 
-    function excess(store, eff_rain, Suzmax)
-        return (store == Suzmax ? eff_rain : 0)
+    function excess(check, limit, default, alternate)
+        return ( check>limit ? default : alternate)
     end
+    
+    @register_symbolic excess(check,limit,default,alternate)
 
-    @register_symbolic excess(Suz, Peff, Suzmax)
+    forcings = Utils.ReadFromCSV("../../input-data/chepe_data.csv")
+    precip = forcings[:,2]
+    pet = forcings[:,7]
 
-    # precip = readfromcsv
-    # pet = readfromcsv
+    P(t) = precip[Int(floor(t)) + 1]
+    Ep(t) = pet[Int(floor(t)) + 1]
 
-    # P(t) = precip[Int(floor(t)) + 1]
-    # Ep(t) = pet[Int(floor(t)) + 1]
+    @register_symbolic P(t)
+    @register_symbolic Ep(t)
 
-    # @register_symbolic P(t)
-    # @register_symbolic Ep(t)
-
-    @named topmodel = ODESystem(
-        [
+    eqs = [
         χcrit ~ f * Ssz + χ * ϕ + μ,
         Ac ~ Iζ(ShiftedGamma(t, χ, ϕ)),
-        Peff ~ P * (1 - Ac),
-        Qex ~ excess(Suz, Peff, Suzmax),
-        Ea ~ min(Suz / (St * Suzmax), 1) * Ep,
+        Peff ~ P(t) * (1 - Ac),
+        Qex ~ excess(Suz, Suzmax, Peff, 0),
+        Ea ~ min(Suz / (St * Suzmax), 1) * Ep(t),
         Qv ~ max((Suz - St * Suzmax) / (Suzmax * (1 - St)) * Kd, 0),
         D(Suz) ~ Peff - Qex - Ea - Qv,
         Qb ~ q0 * exp(-f * Ssz),
         D(Ssz) ~ -Qv + Qb,
-        Qof ~ Ac * P,
-        Q ~ Qof + Qex + Qb
-    ])
+        Qof ~ Ac * P(t),
+        Q ~ Qof + Qex + Qb]
 
-    structural_simplify(topmodel)
+    @named topmodel = ODESystem(eqs,t,[ζcrit,Ac,Peff,Ea],[Suzmax,St,Kd,q0,f,χ,ϕ])
 
-    return topmodel
-
+    return structural_simplify(topmodel)
 end
+
+u0 = [0]
+tspan = (0.0,365*4)
+param = [1,1,1,1,1,1,1]
+
+Prob = ODEProblem(scr,u0,tspan,param)
+sol = solve(Prob)

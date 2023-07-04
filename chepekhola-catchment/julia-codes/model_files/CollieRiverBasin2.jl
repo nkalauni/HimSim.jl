@@ -5,10 +5,9 @@ using Plots
 
 include("../src/Utils.jl")
 
-@parameters Smax
+@parameters Smax Sfc α M
 
-@variables t Q(t) Ea(t) S(t)
-# @variables P(t) Ep(t) #Forcings
+@variables t Q(t) Qsc(t) Qss(t) Ev(t) Eb(t) S(t)
 
 D = Differential(t)
 
@@ -28,16 +27,20 @@ end
 
 @register_symbolic excess(check,limit,default,alternate)
 
-eqn =  [D(S) ~ P(t) - Ea - Q,
-        Ea ~ S/Smax * Ep(t),
-        Q ~ excess(S,Smax,1,0)*P(t)]
+eqn =  [D(S) ~ P(t) - Eb - Ev - Qsc - Qss,
+        Eb ~ S/Smax* (1-M) * Ep(t),
+        Ev ~ excess(S, Sfc, 1, S/Sfc ) * M* Ep(t),
+        Qsc ~ excess(S, Smax, 1, 0) * P(t),
+        Qss ~ excess(S, Sfc, (S-Sfc), 0) * α,
+        Q ~ Qsc + Qss]
 
-@named CollieRiverBasin1 = ODESystem(eqn, t, [Ea,S], [Smax])
+@named CollieRiverBasin2 = ODESystem(eqn, t, [Eb,Ev,S], [Smax,Sfc,α,M])
 
-scr = structural_simplify(CollieRiverBasin1)
+scr = structural_simplify(CollieRiverBasin2)
+
 u0 = [0]
 tspan = (0.0,365*4)
-param = [25]
+param = [1000,0.5,0.5,0.5]
 
 Prob = ODEProblem(scr,u0,tspan,param)
 

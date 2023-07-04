@@ -5,10 +5,9 @@ using Plots
 
 include("../src/Utils.jl")
 
-@parameters Smax
+@parameters Smax Sfc α M b λ
 
-@variables t Q(t) Ea(t) S(t)
-# @variables P(t) Ep(t) #Forcings
+@variables t Q(t) Qsc(t) Qss(t) Qsg(t) Ev(t) Eb(t) S(t) G(t)
 
 D = Differential(t)
 
@@ -28,19 +27,25 @@ end
 
 @register_symbolic excess(check,limit,default,alternate)
 
-eqn =  [D(S) ~ P(t) - Ea - Q,
-        Ea ~ S/Smax * Ep(t),
-        Q ~ excess(S,Smax,1,0)*P(t)]
+eqn =  [D(S) ~ P(t) - Eb - Ev - Qsc - Qss,
+        Eb ~ S/Smax* (1-M) * Ep(t),
+        Ev ~ excess(S, Sfc, 1, S/Sfc ) * M* Ep(t),
+        Qsc ~ excess(S, Smax, 1, 0) * P(t),
+        Qss ~ excess(S, Sfc, (S-Sfc)^b, 0) * α,
+        D(G) ~ λ*Qss - Qsg,
+        Qsg ~ (α * G)^b,
+        Q ~ Qsc + (1-λ)*Qss + Qsg]
 
-@named CollieRiverBasin1 = ODESystem(eqn, t, [Ea,S], [Smax])
+@named CollieRiverBasin3 = ODESystem(eqn, t, [Eb,Ev,S,G], [Smax,Sfc,α,M,b,λ])
 
-scr = structural_simplify(CollieRiverBasin1)
-u0 = [0]
+scr = structural_simplify(CollieRiverBasin3)
+
+u0 = [0,0]
 tspan = (0.0,365*4)
-param = [25]
+param = [1000,0.1,0.5,0.5,3,0.5]
 
 Prob = ODEProblem(scr,u0,tspan,param)
 
-sol = solve(Prob, AutoVern9(Rodas4P()))
+sol = solve(Prob)
 
 plot(sol,vars=[S,Q])

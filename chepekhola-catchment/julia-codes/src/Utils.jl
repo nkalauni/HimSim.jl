@@ -3,7 +3,7 @@ module Utils
 using Dates, CSV, DataFrames
 
 "Wrapper function to read from csv"
-function readfromcsv(filepath; format = "mm/dd/yyyy", dateCol = :datetime)
+function ReadFromCSV(filepath; format = "mm/dd/yyyy", dateCol = :datetime)
     # return DataFrame(CSV.File(filepath))
     df = CSV.read(filepath, DataFrame)
     dfmat = DateFormat(format)

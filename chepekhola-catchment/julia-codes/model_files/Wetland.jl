@@ -12,7 +12,7 @@ include("../src/Utils.jl")
 
 D = Differential(t)
 
-forcings = Utils.readfromcsv("E:/CWRS_Internship/hydro-modeling/chepekhola-catchment/input-data/chepe_data.csv")
+forcings = Utils.ReadFromCSV("../../input-data/chepe_data.csv")
 precip = forcings[:,2]
 pet = forcings[:,7]
 
@@ -46,6 +46,6 @@ tspan = (0.0,365*4)
 params = [1.0,1.0,1.0,1.0]
 Prob = ODEProblem(scr,u0,tspan,params)
 
-sol = solve(Prob)
+sol = solve(Prob,FBDF(),maxiters=100000000)
 
 plot(sol)
