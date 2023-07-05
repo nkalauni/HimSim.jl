@@ -35,8 +35,8 @@ eqn =  [D(S) ~ P(t) - Ea - Q,
 @named CollieRiverBasin1 = ODESystem(eqn, t, [Ea,S], [Smax])
 
 scr = structural_simplify(CollieRiverBasin1)
-u0 = [0]
-tspan = (0.0,365*4)
+u0 = [0.0]
+tspan = (0.0,365.0*4)
 param = [25]
 
 Prob = ODEProblem(scr,u0,tspan,param)

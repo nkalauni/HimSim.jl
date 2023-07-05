@@ -38,8 +38,8 @@ eqn =  [D(S) ~ P(t) - Eb - Ev - Qsc - Qss,
 
 scr = structural_simplify(CollieRiverBasin2)
 
-u0 = [0]
-tspan = (0.0,365*4)
+u0 = [0.0]
+tspan = (0.0,365.0*4)
 param = [1000,0.5,0.5,0.5]
 
 Prob = ODEProblem(scr,u0,tspan,param)
