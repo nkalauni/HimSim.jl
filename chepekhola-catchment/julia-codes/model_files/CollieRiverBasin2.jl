@@ -11,7 +11,7 @@ include("../src/Utils.jl")
 
 D = Differential(t)
 
-forcings = Utils.ReadFromCSV("../../input-data/chepe_data.csv")
+forcings = Utils.ReadFromCSV("chepekhola-catchment\\input-data\\chepe_data.csv")
 precip = forcings[:,2]
 pet = forcings[:,7]
 
