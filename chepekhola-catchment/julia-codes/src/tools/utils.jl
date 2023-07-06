@@ -1,19 +1,18 @@
-module Utils
-
-using Dates, CSV, DataFrames
+export ReadFromCSV, hargreaves
 
 "Wrapper function to read from csv"
-function ReadFromCSV(filepath; format = "mm/dd/yyyy", dateCol = :datetime)
+
+function ReadFromCSV(filepath; format="mm/dd/yyyy", dateCol=:datetime)
     # return DataFrame(CSV.File(filepath))
     df = CSV.read(filepath, DataFrame)
     dfmat = DateFormat(format)
-    tCol = df[!,dateCol]
+    tCol = df[!, dateCol]
     len = length(tCol)
-    dts = Array{Date}(undef,len)
+    dts = Array{Date}(undef, len)
     for i in 1:len
-        dts[i] = Date(tCol[i],dfmat)
+        dts[i] = Date(tCol[i], dfmat)
     end
-    df[!,dateCol] = dts
+    df[!, dateCol] = dts
     return df
 end
 
@@ -42,6 +41,4 @@ function hargreaves(forcings, latitude; tminCol=:tmin, tmaxCol=:tmax, dtCol=:dat
     end
 
     return eto
-end
-
 end

@@ -3,11 +3,11 @@
 # Call solver module and send ODESystem to get solution vector
 # Plotting module for plot
 
-include("src/Utils.jl")
+include("../src/tools/utils.jl")
 
-include("model_files/Topmodel.jl")
+include("../src/Models/Topmodel.jl")
 
-forcings = Utils.readfromcsv("input-data.csv")
+forcings = Readfromcsv("input-data.csv")
 forcings.pet = Utils.hargreaves(forcings, 28.05, tminCol=:tmin, tmaxCol=:tmax, dtCol=:datetime)
 
 modelSystem = Topmodel.system(forcings[!, :precip], forcings[!, :pet])

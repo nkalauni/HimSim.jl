@@ -5,7 +5,7 @@ using Plots
 using SpecialFunctions
 using DomainSets
 
-include("../src/Utils.jl")
+# include("../tools/utils.jl")
 
 const NumStates = 2
 const NumParams = 7
@@ -43,12 +43,12 @@ const NumParams = 7
 D = Differential(t)
 Iζ = Integral(t in DomainSets.ClosedInterval(ζcrit, Inf))
 
-forcings = Utils.ReadFromCSV("input-data/chepe_data.csv")
-precip = forcings[:,2]
-pet = forcings[:,7]
+forcings = ReadFromCSV("input-data/chepe_data.csv")
+precip = forcings[:, 2]
+pet = forcings[:, 7]
 
-P(t) = precip[Int(floor(t)) + 1]
-Ep(t) = pet[Int(floor(t)) + 1]
+P(t) = precip[Int(floor(t))+1]
+Ep(t) = pet[Int(floor(t))+1]
 
 @register_symbolic P(t)
 @register_symbolic Ep(t)
@@ -61,9 +61,9 @@ Ep(t) = pet[Int(floor(t)) + 1]
 
 eqs = [
     ζcrit ~ f * Ssz + χ * ϕ + μ,
-    Ac ~ Iζ(1 / (χ * gamma(ϕ)) * (max(t - μ, 0) / χ)^(ϕ-1) * exp(-(max(t - μ, 0) / χ))),
+    Ac ~ Iζ(1 / (χ * gamma(ϕ)) * (max(t - μ, 0) / χ)^(ϕ - 1) * exp(-(max(t - μ, 0) / χ))),
     Peff ~ P(t) * (1 - Ac),
-    Qex ~ max(Suz-Suzmax, zero(Suz))/(Suz-Suzmax) * Peff,
+    Qex ~ max(Suz - Suzmax, zero(Suz)) / (Suz - Suzmax) * Peff,
     Ea ~ min(Suz / (St * Suzmax), 1.0) * Ep(t),
     Qv ~ max((Suz - St * Suzmax) / (Suzmax * (1.0 - St)) * Kd, 0.0),
     D(Suz) ~ Peff - Qex - Ea - Qv,
@@ -72,17 +72,17 @@ eqs = [
     Qof ~ Ac * P(t),
     Q ~ Qof + Qex + Qb]
 
-@named topmodel = ODESystem(eqs,t,[Suz,Ssz],[Suzmax,St,Kd,q0,f,χ,ϕ])
+@named topmodel = ODESystem(eqs, t, [Suz, Ssz], [Suzmax, St, Kd, q0, f, χ, ϕ])
 
 scr = structural_simplify(topmodel)
 u0 = [0.0, 0.0]
-tspan = (0.0, 365.0*4)
+tspan = (0.0, 365.0 * 4)
 params = [1000.0, 0.5, 0.5, 100.0, 0.5, 5.0, 2.5]
 
-Prob = ODEProblem(scr,u0,tspan,params)
+Prob = ODEProblem(scr, u0, tspan, params)
 sol = solve(Prob)
 
-plot(sol,vars=[Q])
+plot(sol, vars=[Q])
 
 
 
