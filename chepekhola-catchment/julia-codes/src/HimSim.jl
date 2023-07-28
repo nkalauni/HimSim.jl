@@ -10,7 +10,7 @@ using Dates, DataFrames
 @reexport using CSV: CSV
 
 include("tools/tools.jl")
-include("Models/Models.jl")
+include("models/Models.jl")
 
 @reexport using .Models
 

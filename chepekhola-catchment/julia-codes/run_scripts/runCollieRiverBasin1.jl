@@ -9,11 +9,11 @@ using HimSim
 local_root = dirname(Base.active_project())
 
 
-forcings_r = ReadFromCSV(joinpath(local_root, "../../input-data/chepe_data.csv"));
-precip = forcings_r[:, 2];
-pet = forcings_r[:, 7];
+forcings_r = ReadFromCSV(joinpath(local_root, "../input-data/chepe_data.csv"));
+precip = forcings_r[:, 2]
+pet = forcings_r[:, 7]
 
-forcings = (; precip=precip, pet=pet);
+forcings = (; precip=precip, pet=pet)
 
 # eqns, vars, params = CollieRiverBasin1(forcings);
 # @named CollieRiverBasin1 = ODESystem(eqn, t, [Ea, S], [Smax])
