@@ -32,7 +32,7 @@ end
 
 eqn = [D(Sn) ~ Ps - QN,
     Ps ~ excess(Tt, T(t), P(t), zero(P(t))),
-    QN ~ max(T(t) - Tt, zero(T(t))) * ddf,
+    QN ~ max(min((T(t) - Tt) * ddf, Sn), zero(T(t)))
     D(S) ~ Pr + QN - Ea - Qsc - Qin - Qbf,
     Pr ~ excess(T(t), Tt, P(t), zero(P(t))),
     Ea ~ excess(S, zero(S), Ep(t), zero(Ep(t))),
