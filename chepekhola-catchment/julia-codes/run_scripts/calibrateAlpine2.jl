@@ -9,8 +9,13 @@ using ForwardDiff
 using SciMLSensitivity 
 using OptimizationPolyalgorithms
 using Zygote
- 
-include("Utils.jl")
+using OptimizationCMAEvolutionStrategy
+### Temporary
+using CSV
+using Dates
+using DataFrames
+
+include("../src/tools/utils.jl")
  
 @parameters Tt ddf Smax Sfc tcin tcbf
  
@@ -18,7 +23,7 @@ include("Utils.jl")
    
 D = Differential(t)
  
-forcings = Utils.ReadFromCSV("julia/chepe_data.csv")
+forcings = ReadFromCSV("../../input-data/chepe_data.csv")
 precip = forcings[:,2]
 tavg = forcings[:, 5]
 pet = forcings[:,7]
@@ -54,6 +59,7 @@ eqn = [D(Sn) ~ Ps - QN,
  
 model = Alpine2
 scr = structural_simplify(model)
+equations(scr)
  
 u0 = [0.0, 0.0]
 tspan = (0.0, 3 * 365.0)
@@ -62,17 +68,16 @@ param = [15.0, .5, 1000.0, 1.0, 0.5, 0.5]
 t = collect(range(1.0, stop=tspan[2], length=1095))
  
 prob = ODEProblem(scr, u0, tspan, param)
-sol = solve(prob, alg_hints = [:stiff], maxiters=10_000)  # maxiters (solver??)
+sol = solve(prob, Rodas5(), maxiters = 100_000_00, verbose = true)  # maxiters (solver??)
  
 ######################
 # calibration attempt
 ######################
  
-cost_function = build_loss_objective(prob, Tsit5(), L2Loss(t, obs[1:1095]),
-                                      Optimization.AutoForwardDiff(), maxiters=100_000, verbose=false)
+cost_function = build_loss_objective(prob, Rodas5(), L2Loss(t, obs[1:1095]), Optimization.AutoForwardDiff(), maxiters=100_000_00, verbose=true)
  
 optProbs = Optimization.OptimizationProblem(cost_function, param)
-optsol = solve(optProbs, NelderMead()) 
+optsol = solve(optProbs, NelderMead(), verbose = true) 
  
  
  
