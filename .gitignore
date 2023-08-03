@@ -28,3 +28,8 @@ Manifest.toml
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# Editior Config
+.vscode
+settings.json
+.vscode/settings.json
