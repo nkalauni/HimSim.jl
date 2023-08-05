@@ -30,6 +30,6 @@ Manifest.toml
 .ipynb_checkpoints/
 
 # Editior Config
-.vscode
+.vscode/
 settings.json
 .vscode/settings.json
