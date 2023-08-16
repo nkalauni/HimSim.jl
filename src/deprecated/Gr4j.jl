@@ -1,3 +1,4 @@
+#Add Flux smoothing
 module Gr4j
 
 using DataFrames, Dates, Distributions, TOML
