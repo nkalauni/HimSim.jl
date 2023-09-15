@@ -1,5 +1,0 @@
-(undo-tree-save-format-version . 1)
-"975d37eea5e979e5633096136c7f79ab57ae25ab"
-[nil nil nil nil (25799 24940 958293 894000) 0 nil]
-([nil current ((apply 2 52 83 undo--wrap-and-run-primitive-undo 52 83 ((#("# " 0 2 (fontified t face font-lock-comment-delimiter-face)) . -52) 84)) (t 25782 20605 264472 960000)) nil (25799 24940 958289 355000) 0 nil])
-nil
