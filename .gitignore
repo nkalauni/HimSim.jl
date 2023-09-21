@@ -31,5 +31,5 @@ Manifest.toml
 
 # Editior Config
 .vscode
-settings.json
+*.json
 .vscode/settings.json
