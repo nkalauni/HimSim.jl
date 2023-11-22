@@ -1,2 +1,2 @@
-# hydro-modeling
-Developing Hydrological Model for Nepal
+# HimSim.jl
+Himalayan Hydrology Simulation Model
