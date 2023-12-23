@@ -9,7 +9,7 @@ using HimSim
 local_root = dirname(Base.active_project())
 
 
-forcings_r = ReadFromCSV(joinpath(local_root, "../input-data/chepe_data.csv"));
+forcings_r = ReadFromCSV(joinpath(local_root, "examples/chepe_data.csv"));
 precip = forcings_r[:, 2]
 pet = forcings_r[:, 7]
 
