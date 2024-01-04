@@ -61,4 +61,4 @@ sol = solve(prob)
 cost_function = build_loss_objective(prob, Rodas5(), L2Loss(t, obs[1:1095]), Optimization.AutoForwardDiff(), maxiters=100_000_0, verbose=true)
  
 optProbs = Optimization.OptimizationProblem(cost_function, param, lb = [100.0, -5.0, 20.0, 1.1], ub = [1200.0, 3.0, 300.0, 2.9])
-optsol = solve(optProbs, BBO_adaptive_de_rand_1_bin_radiuslimited())
+optsol = Optimization.solve(optProbs)
