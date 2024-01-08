@@ -1,6 +1,6 @@
 using CSV, DataFrames, Optim, Dates, Plots
 
-include("src/Gr4j.jl")
+include("src/models/Gr4j.jl")
 include("src/Calibration.jl")
 
 # reading-in the observed discharge and forcing values 
